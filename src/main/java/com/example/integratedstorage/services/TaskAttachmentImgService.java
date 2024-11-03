@@ -1,5 +1,6 @@
 package com.example.integratedstorage.services;
 
+import com.example.integratedstorage.dto.RequestRemoveFilesDto;
 import com.example.integratedstorage.entities.TaskAttachment;
 import com.example.integratedstorage.entities.TasksV3;
 import com.example.integratedstorage.exceptions.ConflictException;
@@ -7,8 +8,10 @@ import com.example.integratedstorage.exceptions.ItemNotFoundException;
 import com.example.integratedstorage.repositories.TaskAttachmentRepository;
 import com.example.integratedstorage.repositories.TaskRepositoryV3;
 import com.example.integratedstorage.utils.CustomNanoId;
+
 import java.util.concurrent.CompletableFuture;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -61,6 +64,28 @@ public class TaskAttachmentImgService {
         } catch (MalformedURLException e) {
             throw new RuntimeException("File operation error" + fileName, e);
         }
+    }
+
+    @Transactional
+    public List<TaskAttachment> removeFiles(RequestRemoveFilesDto requestRemoveFilesDto) {
+        List<TaskAttachment> taskAttachments = new ArrayList<>();
+        for(String fileId : requestRemoveFilesDto.getFilesId()) {
+            TaskAttachment taskAttachment = repository.findById(fileId).orElseThrow(() -> new ItemNotFoundException("Not found file id : " + fileId));
+            taskAttachments.add(taskAttachment);
+            String filename = taskAttachment.getId()+'-'+taskAttachment.getTask().getIdTask()+'-'+taskAttachment.getName()+'.'+taskAttachment.getType();
+            try {
+                Path filePath = this.findStorageLocation.resolve(filename).normalize();
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath);
+                } else {
+                    throw new RuntimeException("File not found " + filename);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("File operlation error: " + filename, e);
+            }
+            repository.delete(taskAttachment);
+        }
+        return taskAttachments;
     }
 
 
