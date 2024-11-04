@@ -101,6 +101,7 @@ public class TaskAttachmentImgService {
                 try {
                     String nameOrigin = file.getOriginalFilename();
                     String fileName = nameOrigin.substring(0,nameOrigin.lastIndexOf("."));
+                    if(fileName.length() > 100) fileName = fileName.substring(0,100);
                     TaskAttachment taskAttachment = repository.findFirstByNameAndTask(fileName, task);
                     if (taskAttachment != null) throw new ConflictException("file name must be unique within the task");
                     String id = CustomNanoId.generate(16);
@@ -120,7 +121,7 @@ public class TaskAttachmentImgService {
                         throw new RuntimeException("Sorry! Filename contains invalid path sequence" + file.getOriginalFilename());
 
                     }
-                    String newFileName = id + '-' + taskId + '-' + file.getOriginalFilename();
+                    String newFileName = id + '-' + taskId + '-' + fileName;
 
                     Path targetLocation = this.findStorageLocation.resolve(newFileName);
 
