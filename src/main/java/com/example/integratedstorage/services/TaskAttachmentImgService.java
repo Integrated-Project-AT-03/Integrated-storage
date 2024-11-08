@@ -121,7 +121,7 @@ public class TaskAttachmentImgService {
                         throw new RuntimeException("Sorry! Filename contains invalid path sequence" + file.getOriginalFilename());
 
                     }
-                    String newFileName = id + '-' + taskId + '-' + fileName;
+                    String newFileName = id + '-' + taskId + '-' + fileName + nameOrigin.substring(nameOrigin.lastIndexOf("."));
 
                     Path targetLocation = this.findStorageLocation.resolve(newFileName);
 
