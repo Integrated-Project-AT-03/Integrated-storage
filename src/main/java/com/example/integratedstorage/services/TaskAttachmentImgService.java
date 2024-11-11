@@ -72,7 +72,11 @@ public class TaskAttachmentImgService {
         for(String fileId : requestRemoveFilesDto.getFilesId()) {
             TaskAttachment taskAttachment = repository.findById(fileId).orElseThrow(() -> new ItemNotFoundException("Not found file id : " + fileId));
             taskAttachments.add(taskAttachment);
-            String filename = taskAttachment.getId()+'-'+taskAttachment.getTask().getIdTask()+'-'+taskAttachment.getName()+'.'+taskAttachment.getType();
+
+            String filename;
+            if(taskAttachment.getType() != null)
+            filename = taskAttachment.getId()+'-'+taskAttachment.getTask().getIdTask()+'-'+taskAttachment.getName()+'.'+taskAttachment.getType();
+            else filename = taskAttachment.getId()+'-'+taskAttachment.getTask().getIdTask()+'-'+taskAttachment.getName();
             try {
                 Path filePath = this.findStorageLocation.resolve(filename).normalize();
                 if (Files.exists(filePath)) {
@@ -100,16 +104,22 @@ public class TaskAttachmentImgService {
             CompletableFuture<Void> saveFileFuture = CompletableFuture.runAsync(() -> {
                 try {
                     String nameOrigin = file.getOriginalFilename();
-                    String fileName = nameOrigin.substring(0,nameOrigin.lastIndexOf("."));
+                    String fileName = nameOrigin;
+                    String fileType = null;
+                    if(nameOrigin.lastIndexOf(".") != -1) {
+                        fileType = nameOrigin.substring(nameOrigin.lastIndexOf(".")+1);
+                        fileName = nameOrigin.substring(0,nameOrigin.lastIndexOf("."));
+                    }
+
                     if(fileName.length() > 100) fileName = fileName.substring(0,100);
-                    TaskAttachment taskAttachment = repository.findFirstByNameAndTask(fileName, task);
+                    TaskAttachment taskAttachment = repository.findFirstByNameAndTypeAndTask(fileName,fileType, task);
                     if (taskAttachment != null) throw new ConflictException("file name must be unique within the task");
                     String id = CustomNanoId.generate(16);
                     TaskAttachment newTaskAttachment = new TaskAttachment();
                     newTaskAttachment.setId(id);
                     newTaskAttachment.setTask(task);
                     newTaskAttachment.setName(fileName);
-                    newTaskAttachment.setType(nameOrigin.substring(nameOrigin.lastIndexOf(".")+1));
+                    newTaskAttachment.setType(fileType);
                     TaskAttachment savedAttachment = repository.save(newTaskAttachment);
 
 
@@ -121,7 +131,10 @@ public class TaskAttachmentImgService {
                         throw new RuntimeException("Sorry! Filename contains invalid path sequence" + file.getOriginalFilename());
 
                     }
-                    String newFileName = id + '-' + taskId + '-' + fileName + nameOrigin.substring(nameOrigin.lastIndexOf("."));
+                    String newFileName;
+                    if(fileType != null)
+                        newFileName  = id + '-' + taskId + '-' + fileName +'.'+fileType;
+                    else newFileName = id + '-' + taskId + '-' + fileName;
 
                     Path targetLocation = this.findStorageLocation.resolve(newFileName);
 
