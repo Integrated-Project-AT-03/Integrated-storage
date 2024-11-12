@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@Table(name = "task_attachment")
+@Table(name = "task_attachment" , schema = "karban")
 public class TaskAttachment {
 
     @Id

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "tasksV3")
+@Table(name = "tasksV3" , schema = "karban")
 public class TasksV3 {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
