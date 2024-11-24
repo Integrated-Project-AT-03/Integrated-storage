@@ -26,6 +26,7 @@ WORKDIR /app
 
 # Copy the built jar file from the build stage
 COPY --from=build /app/target/Integrated-storage-0.0.1-SNAPSHOT.jar /app.jar
+COPY ./attachment-task /attachment-task
 
 # Command to run the application
 CMD ["java", "-jar", "/app.jar"]
