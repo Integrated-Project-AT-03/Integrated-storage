@@ -42,8 +42,6 @@ public class TaskAttachmentController {
         } else {
             contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
-//        String encodedFilename = URLEncoder.encode("กลุ่ม 4.pdf", StandardCharsets.ISO_8859_1.toString());
-//        response.setHeader("Content-Disposition", "attachment; filename=\"" + encodedFilename + "\"");
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
