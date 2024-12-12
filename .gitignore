@@ -4,7 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 !/attachment-task/.gitignore
-
+**/application-dev.properties
 !/attachment-task/.gitkeep
 ### STS ###
 .apt_generated
